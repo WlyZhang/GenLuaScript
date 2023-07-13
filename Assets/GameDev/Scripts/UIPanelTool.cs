@@ -19,6 +19,8 @@ public class UIPanelTool : MonoBehaviour
     private const string imageKey = "Image";
 
 
+    private string luaCode = string.Empty;
+
 
     [Button("创建Lua组件")]
     [GUIColor(0,1,0)]
@@ -26,22 +28,78 @@ public class UIPanelTool : MonoBehaviour
     {
         Debug.Log($"<color=green>{gameObject.name}: 创建Lua组件</color>");
 
-        //Image
-        List<Image> list = GetImageList();
-        FindImagePath(list);
+        GenLuaCode();
 
-        List<string> tempList = pathList["Image"];
-        for (int i = 0; i < tempList.Count; i++)
-        {
-            Debug.Log(tempList[i]);
-        }
+        Debug.Log(luaCode);
 
 
-        //string path = EditorUtility.SaveFilePanel("创建Lua组件",Application.dataPath+"/", "", "lua");
-        //File.WriteAllText(path, "UI Lua Component");
+        string path = EditorUtility.SaveFilePanel("创建Lua组件",Application.dataPath+"/", gameObject.name, "lua");
+        File.WriteAllText(path, luaCode);
 
+        luaCode = string.Empty;
         pathList.Clear();
         AssetDatabase.Refresh();
+    }
+
+
+    /// <summary>
+    /// 整合Lua代码
+    /// </summary>
+    private void GenLuaCode()
+    {
+        //Lua框架设定
+        string luaName = gameObject.name;
+        string luaUnity = "unity";
+        string luaPanel = "panel";
+        string panel = $"{luaName}.{luaPanel}";
+        string onClickFuncName = $"{luaName}.OnClickCallback";
+
+        luaCode = "\n" + luaName + " = {}\n\n";
+        luaCode += $"function {luaName}:Create()\n\n";
+        luaCode += $"\t{panel} = UIManager:OpenAndCloseOther('{luaName}')\n\n";
+
+
+        #region InputField 代码生成
+        //InputField
+        List<InputField> inputFieldList = GetInputFieldList();
+        FindInputFieldPath(inputFieldList);
+
+        List<string> tempInputFieldList = pathList["InputField"];
+        for (int i = 0; i < tempInputFieldList.Count; i++)
+        {
+            luaCode += $"\t{luaName}.{inputFieldList[i].name} = {panel}.transform:Find('{tempInputFieldList[i]}'):GetComponent('InputField')\n\n";
+        }
+
+        #endregion
+        
+        #region Button 代码生成
+        //InputField
+        List<Button> buttonList = GetButtonList();
+        FindButtonPath(buttonList);
+
+        List<string> tempButtonList = pathList["Button"];
+        for (int i = 0; i < tempButtonList.Count; i++)
+        {
+            luaCode += $"\t{luaName}.{buttonList[i].name} = {panel}.transform:Find('{tempButtonList[i]}'):GetComponent('Button')\n\n";
+        }
+
+        #endregion
+
+        luaCode += "end\n\n";
+
+        #region Button 点击事件代码生成
+        luaCode += $"function {onClickFuncName}()\n\n";
+
+        for (int i = 0; i < buttonList.Count; i++)
+        {
+            luaCode += $"\t--Button: {buttonList[i].name} 点击事件\n";
+            luaCode += $"\t{luaName}.{buttonList[i].name}.onClick:AddListener(function()\n\t\t\n";
+            luaCode += "\tend)\n\n";
+        }
+        #endregion
+
+        luaCode += "end\n\n";
+        luaCode += $"\n\nreturn {luaName}";
     }
 
     #region 按钮组件
@@ -145,6 +203,7 @@ public class UIPanelTool : MonoBehaviour
         }
     }
     #endregion
+
 
     #region 图片组件
     /// <summary>
