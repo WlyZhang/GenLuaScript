@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 #if UNITY_EDITOR
 using UnityEditor;
-#endif
+
 
 public class UIPanelTool : MonoBehaviour
 {
@@ -59,7 +59,7 @@ public class UIPanelTool : MonoBehaviour
         luaCode += $"\t{panel} = UIManager:OpenAndCloseOther('{luaName}')\n\n";
 
 
-        #region InputField 代码生成
+#region InputField 代码生成
         //InputField
         List<InputField> inputFieldList = GetInputFieldList();
         FindInputFieldPath(inputFieldList);
@@ -70,9 +70,9 @@ public class UIPanelTool : MonoBehaviour
             luaCode += $"\t{luaName}.{inputFieldList[i].name} = {panel}.transform:Find('{tempInputFieldList[i]}'):GetComponent('InputField')\n\n";
         }
 
-        #endregion
+#endregion
         
-        #region Button 代码生成
+#region Button 代码生成
         //InputField
         List<Button> buttonList = GetButtonList();
         FindButtonPath(buttonList);
@@ -83,11 +83,11 @@ public class UIPanelTool : MonoBehaviour
             luaCode += $"\t{luaName}.{buttonList[i].name} = {panel}.transform:Find('{tempButtonList[i]}'):GetComponent('Button')\n\n";
         }
 
-        #endregion
+#endregion
 
         luaCode += "end\n\n";
 
-        #region Button 点击事件代码生成
+#region Button 点击事件代码生成
         luaCode += $"function {onClickFuncName}()\n\n";
 
         for (int i = 0; i < buttonList.Count; i++)
@@ -96,13 +96,13 @@ public class UIPanelTool : MonoBehaviour
             luaCode += $"\t{luaName}.{buttonList[i].name}.onClick:AddListener(function()\n\t\t\n";
             luaCode += "\tend)\n\n";
         }
-        #endregion
+#endregion
 
         luaCode += "end\n\n";
         luaCode += $"\n\nreturn {luaName}";
     }
 
-    #region 按钮组件
+#region 按钮组件
     /// <summary>
     /// 获取按钮列表
     /// </summary>
@@ -134,9 +134,9 @@ public class UIPanelTool : MonoBehaviour
             GetParent<Button>(path, child);
         }
     }
-    #endregion
+#endregion
 
-    #region 输入框组件
+#region 输入框组件
     /// <summary>
     /// 获取输入框列表
     /// </summary>
@@ -168,9 +168,9 @@ public class UIPanelTool : MonoBehaviour
             GetParent<InputField>(path, child);
         }
     }
-    #endregion
+#endregion
 
-    #region 文本组件
+#region 文本组件
     /// <summary>
     /// 获取按钮列表
     /// </summary>
@@ -202,10 +202,10 @@ public class UIPanelTool : MonoBehaviour
             GetParent<Text>(path, child);
         }
     }
-    #endregion
+#endregion
 
 
-    #region 图片组件
+#region 图片组件
     /// <summary>
     /// 获取按钮列表
     /// </summary>
@@ -237,12 +237,12 @@ public class UIPanelTool : MonoBehaviour
             GetParent<Image>(path, child);
         }
     }
-    #endregion
+#endregion
 
 
 
 
-    #region 公用函数
+#region 公用函数
     /// <summary>
     /// 获取父对象路径
     /// </summary>
@@ -270,6 +270,7 @@ public class UIPanelTool : MonoBehaviour
             GetParent<T>(path, child.parent);
         }
     }
-    #endregion
+#endregion
 
 }
+#endif
