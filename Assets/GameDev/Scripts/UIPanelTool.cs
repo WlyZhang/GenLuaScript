@@ -21,10 +21,6 @@ public class UIPanelTool : MonoBehaviour
 
     private string luaCode = string.Empty;
 
-    public bool can_InputField;
-    public bool can_Text;
-    public bool can_Button;
-
 
     [Button("创建Lua组件")]
     [GUIColor(0,1,0)]
@@ -55,8 +51,8 @@ public class UIPanelTool : MonoBehaviour
         string luaName = gameObject.name;
         string luaUnity = "unity";
         string luaPanel = "panel";
-        string panel = $"{luaName}.{luaPanel}";
-        string onClickFuncName = $"{luaName}.OnClickCallback";
+        string panel = $"self.{luaPanel}";
+        string onClickFuncName = $"{luaName}:OnClickCallback";
 
         luaCode = "\n" + luaName + " = {}\n\n";
         luaCode += $"function {luaName}:Create()\n\n";
@@ -65,48 +61,26 @@ public class UIPanelTool : MonoBehaviour
 
         #region InputField 代码生成
         //InputField
+        List<InputField> inputFieldList = GetInputFieldList();
+        FindInputFieldPath(inputFieldList);
 
-        if(can_InputField)
+        List<string> tempInputFieldList = pathList["InputField"];
+        for (int i = 0; i < tempInputFieldList.Count; i++)
         {
-            List<InputField> inputFieldList = GetInputFieldList();
-            FindInputFieldPath(inputFieldList);
-
-            List<string> tempInputFieldList = pathList["InputField"];
-            for (int i = 0; i < tempInputFieldList.Count; i++)
-            {
-                luaCode += $"\t{luaName}.{inputFieldList[i].name} = {panel}.transform:Find('{tempInputFieldList[i]}'):GetComponent('InputField')\n\n";
-            }
+            luaCode += $"\tself.{inputFieldList[i].name} = {panel}.transform:Find('{tempInputFieldList[i]}'):GetComponent('InputField')\n\n";
         }
 
         #endregion
-
-        #region Text 代码生成
-        if (can_Text)
-        {
-            List<Text> textList = GetTextList();
-            FindTextPath(textList);
-
-            List<string> tempTextList = pathList["Text"];
-            for (int i = 0; i < tempTextList.Count; i++)
-            {
-                luaCode += $"\t{luaName}.{textList[i].name} = {panel}.transform:Find('{tempTextList[i]}'):GetComponent('Text')\n\n";
-
-            }
-        }
-        #endregion
-
+        
         #region Button 代码生成
-        //Button
+        //InputField
         List<Button> buttonList = GetButtonList();
-        if (can_Button)
-        {
-            FindButtonPath(buttonList);
+        FindButtonPath(buttonList);
 
-            List<string> tempButtonList = pathList["Button"];
-            for (int i = 0; i < tempButtonList.Count; i++)
-            {
-                luaCode += $"\t{luaName}.{buttonList[i].name} = {panel}.transform:Find('{tempButtonList[i]}'):GetComponent('Button')\n\n";
-            }
+        List<string> tempButtonList = pathList["Button"];
+        for (int i = 0; i < tempButtonList.Count; i++)
+        {
+            luaCode += $"\tself.{buttonList[i].name} = {panel}.transform:Find('{tempButtonList[i]}'):GetComponent('Button')\n\n";
         }
 
         #endregion
@@ -114,19 +88,14 @@ public class UIPanelTool : MonoBehaviour
         luaCode += "end\n\n";
 
         #region Button 点击事件代码生成
+        luaCode += $"function {onClickFuncName}()\n\n";
 
-        if(can_Button)
+        for (int i = 0; i < buttonList.Count; i++)
         {
-            luaCode += $"function {onClickFuncName}()\n\n";
-
-            for (int i = 0; i < buttonList.Count; i++)
-            {
-                luaCode += $"\t--Button: {buttonList[i].name} 点击事件\n";
-                luaCode += $"\t{luaName}.{buttonList[i].name}.onClick:AddListener(function()\n\t\t\n";
-                luaCode += "\tend)\n\n";
-            }
+            luaCode += $"\t--Button: {buttonList[i].name} 点击事件\n";
+            luaCode += $"\tself.{buttonList[i].name}.onClick:AddListener(function()\n\t\t\n";
+            luaCode += "\tend)\n\n";
         }
-        
         #endregion
 
         luaCode += "end\n\n";
@@ -282,13 +251,6 @@ public class UIPanelTool : MonoBehaviour
     /// <param name="child"></param>
     private void GetParent<T>(string path, Transform child)
     {
-        if(child.Equals(child.root))
-        {
-            string key = typeof(T).Name;
-            pathList[key].Add(path);
-            return;
-        }
-
         if (child.parent.Equals(transform.parent))
         {
             string key = typeof(T).Name;
